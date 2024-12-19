@@ -20,3 +20,9 @@ npm install --save-dev jest @types/jest
 npm install --save-dev babel-jest @babel/preset-env
 
 npm install --save-dev supertest @types/supertest
+
+// konfigurasi prisma
+npx prisma init
+
+npx prisma migrate dev --create-only // untuk membuat file migration nya
+npx prisma migrate dev // untuk mengeksekusi ke database
