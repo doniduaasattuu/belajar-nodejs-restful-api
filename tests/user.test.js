@@ -1,11 +1,27 @@
 import supertest from "supertest";
 import { web } from "../src/application/web.js";
 import { logger } from "../src/application/logging.js";
-import { createTestUser, getTestUser, removeTestUser } from "./test-util.js";
+import {
+  createTestUser,
+  getTestUser,
+  removeAllTestContacts,
+  removeTestUser,
+} from "./test-util.js";
 import bcrypt from "bcrypt";
 
+beforeAll(async () => {
+  await removeAllTestContacts();
+  await removeTestUser();
+});
+
 describe("POST /api/users", () => {
+  beforeEach(async () => {
+    await removeAllTestContacts();
+    await removeTestUser();
+  });
+
   afterEach(async () => {
+    await removeAllTestContacts();
     await removeTestUser();
   });
 
@@ -42,6 +58,7 @@ describe("POST /api/user/login", () => {
   });
 
   afterEach(async () => {
+    await removeAllTestContacts();
     await removeTestUser();
   });
 
@@ -93,6 +110,7 @@ describe("POST /api/users/current", () => {
   });
 
   afterEach(async () => {
+    await removeAllTestContacts();
     await removeTestUser();
   });
 
@@ -125,6 +143,7 @@ describe("PATCH /api/users/current", () => {
   });
 
   afterEach(async () => {
+    await removeAllTestContacts();
     await removeTestUser();
   });
 
@@ -193,6 +212,7 @@ describe("DELETE /api/users/logout", () => {
   });
 
   afterEach(async () => {
+    await removeAllTestContacts();
     await removeTestUser();
   });
 
