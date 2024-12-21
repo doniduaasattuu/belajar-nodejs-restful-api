@@ -7,6 +7,7 @@ import {
   removeTestUser,
 } from "./test-util.js";
 import { web } from "../src/application/web.js";
+import { logger } from "../src/application/logging.js";
 
 beforeAll(async () => {
   await removeAllTestContacts();
@@ -96,5 +97,71 @@ describe("GET /api/contacts/:contactId", () => {
 
     expect(result.status).toBe(404);
     expect(result.body.data).toBeUndefined();
+  });
+});
+
+describe("GET /api/contacts/:contactId", () => {
+  beforeEach(async () => {
+    await createTestUser();
+    await createTestContact();
+  });
+
+  afterEach(async () => {
+    await removeAllTestContacts();
+    await removeTestUser();
+  });
+
+  it("should can update contact", async () => {
+    const testContact = await getTestContact();
+
+    const result = await supertest(web)
+      .put("/api/contacts/" + testContact.id)
+      .set("Authorization", "test")
+      .send({
+        first_name: "Eko",
+        last_name: "Khannedy",
+        email: "eko@pzn.com",
+        phone: "08984444",
+      });
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.first_name).toBe("Eko");
+    expect(result.body.data.last_name).toBe("Khannedy");
+    expect(result.body.data.email).toBe("eko@pzn.com");
+    expect(result.body.data.phone).toBe("08984444");
+  });
+
+  it("should reject if request update contact is invalid", async () => {
+    const testContact = await getTestContact();
+
+    const result = await supertest(web)
+      .put("/api/contacts/" + testContact.id)
+      .set("Authorization", "test")
+      .send({
+        first_name: "",
+        last_name: "",
+        email: "eko@pzn",
+        phone: "",
+      });
+
+    expect(result.status).toBe(400);
+    expect(result.body.errors).toBeDefined();
+    logger.info(result.body.errors);
+  });
+
+  it("should reject if contact is not found", async () => {
+    const testContact = await getTestContact();
+
+    const result = await supertest(web)
+      .put("/api/contacts/" + testContact.id + 1)
+      .set("Authorization", "test")
+      .send({
+        first_name: "Eko",
+        last_name: "Khannedy",
+        email: "eko@pzn.com",
+        phone: "08984444",
+      });
+
+    expect(result.status).toBe(404);
   });
 });
