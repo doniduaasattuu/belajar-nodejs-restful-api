@@ -1,5 +1,6 @@
 import supertest from "supertest";
 import {
+  createManyTestContacts,
   createTestContact,
   createTestUser,
   getTestContact,
@@ -211,5 +212,44 @@ describe("DELETE /api/contacts/:contactId", () => {
     expect(result.status).toBe(404);
     expect(result.body.errors).toBeDefined();
     expect(result.body.errors).toBe("contact is not found");
+  });
+});
+
+describe("GET /api/contacts", () => {
+  beforeEach(async () => {
+    await createTestUser();
+    await createManyTestContacts();
+  });
+
+  afterEach(async () => {
+    await removeAllTestContacts();
+    await removeTestUser();
+  });
+
+  it("should can search without parameter", async () => {
+    const result = await supertest(web)
+      .get("/api/contacts")
+      .set("Authorization", "test");
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.length).toBe(10);
+    expect(result.body.data.paging.page).toBe(1);
+    expect(result.body.data.paging.total_page).toBe(2);
+    expect(result.body.data.paging.total_item).toBe(15);
+  });
+
+  it("should can search to page 2", async () => {
+    const result = await supertest(web)
+      .get("/api/contacts")
+      .set("Authorization", "test")
+      .query({
+        page: 2,
+      });
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.length).toBe(10);
+    expect(result.body.data.paging.page).toBe(1);
+    expect(result.body.data.paging.total_page).toBe(2);
+    expect(result.body.data.paging.total_item).toBe(15);
   });
 });
