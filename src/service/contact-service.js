@@ -1,5 +1,4 @@
 import { prismaClient } from "../application/database.js";
-import { logger } from "../application/logging.js";
 import { ResponseError } from "../error/response-error.js";
 import {
   createContactValidation,
