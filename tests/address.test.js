@@ -165,3 +165,111 @@ describe("GET /api/contacts/:contactId/addresses/:addressId", () => {
     expect(result.body.errors).toBe("address is not found");
   });
 });
+
+describe("PUT /api/contacts/:contactId/addresses/:addressId", () => {
+  beforeEach(async () => {
+    await createTestUser();
+    await createTestContact();
+    await createTestAddress();
+  });
+
+  afterEach(async () => {
+    await removeAllTestAddresses();
+    await removeAllTestContacts();
+    await removeTestUser();
+  });
+
+  it("should can update address", async () => {
+    const testContact = await getTestContact();
+    const testAddress = await getTestAddress();
+
+    expect(testAddress.contact_id).toBe(testContact.id);
+
+    const result = await supertest(web)
+      .put("/api/contacts/" + testContact.id + "/addresses/" + testAddress.id)
+      .set("Authorization", "test")
+      .send({
+        street: "Jl.Soekarno",
+        city: "Blitar",
+        province: "Jawa Timur",
+        country: "Indonesia",
+        postal_code: "62353",
+      });
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.id).toBeDefined();
+    expect(result.body.data.street).toBe("Jl.Soekarno");
+    expect(result.body.data.city).toBe("Blitar");
+    expect(result.body.data.province).toBe("Jawa Timur");
+    expect(result.body.data.country).toBe("Indonesia");
+    expect(result.body.data.postal_code).toBe("62353");
+  });
+
+  it("should reject if user is invalid", async () => {
+    const testContact = await getTestContact();
+    const testAddress = await getTestAddress();
+
+    expect(testAddress.contact_id).toBe(testContact.id);
+
+    const result = await supertest(web)
+      .put("/api/contacts/" + testContact.id + "/addresses/" + testAddress.id)
+      .set("Authorization", "salah")
+      .send({
+        street: "Jl.Soekarno",
+        city: "Blitar",
+        province: "Jawa Timur",
+        country: "Indonesia",
+        postal_code: "62353",
+      });
+
+    expect(result.status).toBe(401);
+  });
+
+  it("should reject if contact is not found", async () => {
+    const testContact = await getTestContact();
+    const testAddress = await getTestAddress();
+
+    expect(testAddress.contact_id).toBe(testContact.id);
+
+    const result = await supertest(web)
+      .put(
+        "/api/contacts/" + (testContact.id + 1) + "/addresses/" + testAddress.id
+      )
+      .set("Authorization", "test")
+      .send({
+        street: "Jl.Soekarno",
+        city: "Blitar",
+        province: "Jawa Timur",
+        country: "Indonesia",
+        postal_code: "62353",
+      });
+
+    expect(result.status).toBe(404);
+    expect(result.body.errors).toBeDefined();
+    expect(result.body.errors).toBe("contact is not found");
+  });
+
+  it("should reject if address is not found", async () => {
+    const testContact = await getTestContact();
+    const testAddress = await getTestAddress();
+
+    expect(testAddress.contact_id).toBe(testContact.id);
+
+    const result = await supertest(web)
+      .put(
+        "/api/contacts/" + testContact.id + "/addresses/" + (testAddress.id + 1)
+      )
+      .set("Authorization", "test")
+      .send({
+        street: "Jl.Soekarno",
+        city: "Blitar",
+        province: "Jawa Timur",
+        country: "Indonesia",
+        postal_code: "62353",
+      });
+
+    expect(result.status).toBe(404);
+    expect(result.body.errors).toBeDefined();
+    expect(result.body.errors).toBe("address is not found");
+  });
+});
