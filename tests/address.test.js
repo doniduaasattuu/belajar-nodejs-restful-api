@@ -1,6 +1,7 @@
 import supertest from "supertest";
 import { web } from "../src/application/web.js";
 import {
+  createManyTestAddresses,
   createTestAddress,
   createTestContact,
   createTestUser,
@@ -364,5 +365,53 @@ describe("DELETE /api/contacts/:contactId/addresses/:addressId", () => {
 
     testAddress = await getTestAddress();
     expect(testAddress).toBeDefined();
+  });
+});
+
+describe("GET /api/contacts/:contactId/addresses", () => {
+  beforeEach(async () => {
+    await createTestUser();
+    await createTestContact();
+    await createManyTestAddresses();
+  });
+
+  afterEach(async () => {
+    await removeAllTestAddresses();
+    await removeAllTestContacts();
+    await removeTestUser();
+  });
+
+  it("should can get list of addresses", async () => {
+    const testContact = await getTestContact();
+
+    const result = await supertest(web)
+      .get("/api/contacts/" + testContact.id + "/addresses/")
+      .set("Authorization", "test");
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.length).toBe(15);
+  });
+
+  it("should reject get list of address if user is invalid", async () => {
+    const testContact = await getTestContact();
+
+    const result = await supertest(web)
+      .get("/api/contacts/" + testContact.id + "/addresses/")
+      .set("Authorization", "salah");
+
+    expect(result.status).toBe(401);
+    expect(result.body.errors).toBeDefined();
+  });
+
+  it("should reject get list of address if contact is not found", async () => {
+    const testContact = await getTestContact();
+
+    const result = await supertest(web)
+      .get("/api/contacts/" + (testContact.id + 1) + "/addresses/")
+      .set("Authorization", "test");
+
+    expect(result.status).toBe(404);
+    expect(result.body.errors).toBeDefined();
+    expect(result.body.errors).toBe("contact is not found");
   });
 });

@@ -108,3 +108,20 @@ export const getTestAddress = async () => {
     },
   });
 };
+
+export const createManyTestAddresses = async () => {
+  const testContact = await getTestContact();
+
+  for (let i = 0; i < 15; i++) {
+    await prismaClient.address.create({
+      data: {
+        contact_id: testContact.id,
+        street: "Jl.Tan Malaka " + i,
+        city: "Cikarang Barat, Bekasi " + i,
+        province: "Jawa Barat " + i,
+        country: "Indonesia " + i,
+        postal_code: "17530" + i,
+      },
+    });
+  }
+};
