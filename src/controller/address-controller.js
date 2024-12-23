@@ -36,6 +36,7 @@ const update = async (req, res, next) => {
     const contactId = req.params.contactId;
     const addressId = req.params.addressId;
     const request = req.body;
+    request.id = addressId;
 
     const result = await addressService.update(
       user,
