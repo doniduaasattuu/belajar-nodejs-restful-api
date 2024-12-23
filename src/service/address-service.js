@@ -114,4 +114,14 @@ const update = async (user, contactId, addressId, request) => {
   });
 };
 
-export default { create, get, update };
+const remove = async (user, contactId, addressId) => {
+  addressId = await checkAddressMustExist(user, contactId, addressId);
+
+  await prismaClient.address.delete({
+    where: {
+      id: addressId,
+    },
+  });
+};
+
+export default { create, get, update, remove };
